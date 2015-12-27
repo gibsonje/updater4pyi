@@ -53,6 +53,7 @@ import copy
 import json
 import inspect
 import urllib2
+import requests
 
 from . import util
 from .upd_defs import RELTYPE_UNKNOWN, RELTYPE_EXE, RELTYPE_ARCHIVE, RELTYPE_BUNDLE_ARCHIVE
@@ -712,16 +713,9 @@ class UpdateGithubReleasesSource(UpdateSource):
         url = 'https://api.github.com/repos/'+self.github_user_repo+'/releases'
 
         try:
-            fdata = upd_downloader.url_opener.open(url)
-        except urllib2.URLError as e:
+          data = requests.get(url).json()
+        except Exception as e:
             logger.warning("Can't connect to github for software update check: %s", e)
-            return None
-
-        try:
-            data = json.load(fdata);
-        except ValueError:
-            logger.warning("Unable to parse data returned by github at %s!", url)
-            return None
 
         if (isinstance(data, dict)):
             logger.warning("Error: %s" %(data.get('message', '<no message provided>')))
